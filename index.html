@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Finanças</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="navbar">
+    <button class="nav-btn" onclick="ativarMenu(this); mostrarTela('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="ativarMenu(this); mostrarLista(); mostrarTela('lista')">Lista</button>
+    <button class="nav-btn" onclick="ativarMenu(this); mostrarTela('adicionar')">Adicionar</button>
+</div>
+
+
+    <div id="tela-dashboard" class="tela">
+        <h2>Dashboard</h2>
+
+        <div class="card-dashboard">
+            <p class="metric-title">Total de Entradas</p>
+            <p class="metric-value" id="totalEntradas">R$0,00</p>
+        </div>
+
+        <div class="card-dashboard">
+            <p class="metric-title">Total de Despesas</p>
+            <p class="metric-value" id="totalDespesas">R$0,00</p>
+        </div>
+
+        <div class="card-dashboard">
+            <p class="metric-title">Saldo</p>
+            <p class="metric-value" id="saldo">R$0,00</p>
+        </div>
+
+        <div class="card-dashboard">
+            <p class="metric-title">Percentual Gasto</p>
+            <p class="metric-value" id="percentualGasto">0%</p>
+        </div>
+
+        <button class="btn btn-default" onclick="mostrarTela('lista')">Ver Lista de Lançamentos</button>
+        <button class="btn btn-default" onclick="mostrarTela('adicionar')">Adicionar Registro</button>
+    </div>
+
+
+    <div id="tela-lista" class="tela">
+        <h2>Lançamentos</h2>
+
+        <div id="lancamentoList"></div>
+
+        <button class="btn btn-default" onclick="mostrarTela('adicionar')">Adicionar Registro</button>
+        <button class="btn" style="background: var(--text-light); color: white;" onclick="mostrarTela('dashboard')">Voltar</button>
+    </div>
+
+
+    <div id="tela-adicionar" class="tela">
+        <h2>Adicionar Registro</h2>
+
+        <div class="input-group">
+            <label>Valor:</label>
+            <input type="number" id="valor">
+        </div>
+
+        <div class="input-group">
+            <label>Descrição:</label>
+            <input type="text" id="descricao">
+        </div>
+
+        <div class="input-group">
+            <label>Categoria:</label>
+            <input type="text" id="categoria">
+        </div>
+
+        <div class="input-group">
+            <label>Tipo:</label>
+            <select id="tipo">
+                <option value="entrada">Entrada</option>
+                <option value="despesa">Despesa</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Data:</label>
+            <input type="date" id="data">
+        </div>
+
+        <button class="btn btn-success" onclick="addRegistro()">Salvar Registro</button>
+        <button class="btn btn-danger" onclick="mostrarTela('lista')">Cancelar</button>
+    </div>
+
+
+    <div id="tela-editar" class="tela">
+        <h2>Editar Registro</h2>
+
+        <div class="input-group">
+            <label>Valor:</label>
+            <input type="number" id="valor-edit"> </div>
+
+        <div class="input-group">
+            <label>Descrição:</label>
+            <input type="text" id="descricao-edit">
+        </div>
+
+        <div class="input-group">
+            <label>Categoria:</label>
+            <input type="text" id="categoria-edit">
+        </div>
+
+        <div class="input-group">
+            <label>Tipo:</label>
+            <select id="tipo-edit">
+                <option value="entrada">Entrada</option>
+                <option value="despesa">Despesa</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Data:</label>
+            <input type="date" id="data-edit">
+        </div>
+
+        <button class="btn btn-success" onclick="salvarRegistroEditado()">Salvar Edição</button>
+        <button class="btn btn-danger" onclick="mostrarTela('lista')">Cancelar</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

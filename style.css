@@ -1,0 +1,301 @@
+ :root {
+            --primary: #4a7dfc; /* Azul Principal */
+            --primary-dark: #345bd1;
+            --bg: #f4f6fb; /* Fundo Leve */
+            --card-bg: #ffffff;
+            --danger: #ff5b5b; /* Vermelho Despesa */
+            --success: #32c06f; /* Verde Entrada */
+            --text-dark: #333;
+            --text-light: #666;
+            --shadow: rgba(0,0,0,0.1);
+        }
+
+        /* --- Estilos Globais --- */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif; /* Aplicando a nova fonte */
+            background: var(--bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        h2 {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 25px;
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+            padding-bottom: 10px;
+        }
+
+        .tela {
+            display: none;
+            padding: 25px 20px;
+            max-width: 500px; /* Levemente maior */
+            margin: 0 auto;
+        }
+
+        /* --- Estilo de Cards --- */
+        .card-dashboard {
+            background: var(--card-bg);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08); /* Sombra mais destacada */
+        }
+
+        .metric-title {
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        .metric-value {
+            font-size: 24px; /* Aumentado */
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        /* --- Estilo de Botões Principais e Formulário --- */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-default { /* Botão principal (azul) */
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-default:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 6px;
+            font-size: 15px;
+        }
+        
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(74, 125, 252, 0.2);
+            outline: none;
+        }
+
+        /* --- NAVBAR SUPERIOR --- */
+        .navbar {
+            /* ... (manter o estilo original) ... */
+            width: 100%;
+            background: var(--primary);
+            padding: 12px 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 10px 18px; /* Mais padding */
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.35);
+        }
+
+        .nav-btn.active {
+            background: white;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* --- LISTA DE LANÇAMENTOS (Onde o Visual é Melhorado) --- */
+        
+        .full-card {
+            background: var(--card-bg);
+            padding: 18px; /* Mais espaço interno */
+            border-radius: 12px;
+            margin-bottom: 15px; /* Mais margem */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.07);
+            
+            /* Usando Grid para o Layout Principal */
+            display: grid;
+            grid-template-columns: 1fr auto; /* Coluna 1: Conteúdo, Coluna 2: Valor e Botões */
+            grid-template-areas: 
+                "main-info value"
+                "category actions";
+            gap: 10px;
+            
+            /* Destaque da barra lateral */
+            border-left: 5px solid transparent; 
+            transition: border-left 0.3s ease;
+        }
+        
+        .entrada-card {
+            border-left-color: var(--success);
+        }
+
+        .despesa-card {
+            border-left-color: var(--danger);
+        }
+
+        .full-card:hover {
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        .data-format {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-light);
+            grid-area: date;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .descricao-format {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            grid-area: description;
+            display: block;
+            color: var(--text-dark);
+        }
+
+        .categoria-tipo-format {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 4px;
+            grid-area: category;
+        }
+        
+        /* Layout para as informações principais (Data, Descrição) */
+        .main-info-container {
+            grid-area: main-info;
+            text-align: left;
+        }
+
+        .valor-format {
+            font-size: 20px; /* Maior e mais visível */
+            font-weight: 700;
+            grid-area: value;
+            text-align: right;
+            align-self: flex-start; /* Alinha no topo */
+            line-height: 1; /* Para não ocupar espaço desnecessário */
+        }
+        
+        /* Cor dinâmica para o Valor (apenas para demonstração visual, o JS precisa controlar isso) */
+        .entrada-card .valor-format {
+            color: var(--success);
+        }
+        
+        .despesa-card .valor-format {
+            color: var(--danger);
+        }
+
+        .card-buttons {
+            grid-area: actions;
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            justify-content: flex-end; /* Alinhar botões à direita */
+        }
+
+        .small-btn {
+            padding: 8px 12px; /* Botões menores e mais bonitos */
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Ajuste do layout de informações principais dentro do card */
+        .full-card {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .data-format, .descricao-format, .categoria-tipo-format {
+            width: 100%; /* Ocupam a largura total acima do valor */
+        }
+        
+        .valor-format {
+            order: 2; /* Move o valor para a segunda coluna implícita */
+            margin-left: auto;
+            align-self: center;
+        }
+        
+        .card-buttons {
+            order: 3; /* Move botões para baixo */
+            width: 100%;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        .empty-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            border: 1px dashed var(--gray);
+        }
+        
+        /* --- Responsividade (Ajustes Finais) --- */
+        @media (max-width: 400px) {
+            .full-card {
+                display: block; /* Volta para o layout de bloco em telas muito pequenas */
+                padding: 15px;
+            }
+            .valor-format {
+                text-align: left;
+                margin-top: 10px;
+                margin-left: 0;
+            }
+            .card-buttons {
+                justify-content: space-between;
+                gap: 5px;
+            }
+            .small-btn {
+                flex: 1;
+            }
+        }
