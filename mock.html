@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dark Finance Mock</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Inter, system-ui, Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #0b1c2d 0%, #020409 60%);
+      color: #fff;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      z-index: 10;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+
+    .menu {
+      display: flex;
+      gap: 28px;
+    }
+
+    .menu a {
+      text-decoration: none;
+      color: #fff;
+      opacity: 0.8;
+      transition: 0.2s;
+    }
+
+    .menu a:hover {
+      opacity: 1;
+    }
+
+    /* HERO */
+    .hero {
+      height: 100vh;
+      padding-top: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      width: 80%;
+      max-width: 1200px;
+    }
+
+    .hero-text h1 {
+      font-size: 56px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .hero-text p {
+      opacity: 0.8;
+      margin-bottom: 30px;
+      max-width: 420px;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #3b82f6, #60a5fa);
+      color: #000;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* GLASS CARDS */
+    .glass {
+      background: rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(18px);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+    }
+
+    .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #60a5fa;
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="logo">DarkFinance</div>
+    <div class="menu">
+      <a href="#">Dashboard</a>
+      <a href="#">Registros</a>
+      <a href="#">Novo</a>
+      <a href="#">Sair</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-container">
+      <div class="hero-text">
+        <h1>Controle suas finanças com clareza</h1>
+        <p>
+          Visualize gastos, receitas e metas em um único painel moderno e minimalista.
+        </p>
+        <button class="btn">Ver Dashboard</button>
+      </div>
+
+      <div class="cards">
+        <div class="glass card">
+          <h3>Saldo Atual</h3>
+          <div class="value">R$ 4.250</div>
+        </div>
+
+        <div class="glass card">
+          <h3>Receitas</h3>
+          <div class="value">R$ 6.100</div>
+        </div>
+
+        <div class="glass card">
+          <h3>Despesas</h3>
+          <div class="value">R$ 1.850</div>
+        </div>
+
+        <div class="glass card">
+          <h3>Meta do mês</h3>
+          <div class="value">70%</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
