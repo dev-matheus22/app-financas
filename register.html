@@ -11,30 +11,30 @@
     <h1>Criar conta</h1>
     <p>Comece a controlar suas finanças</p>
 
-    <form>
+    <form id="registerForm">
       <div class="form-group">
         <label>Nome</label>
-        <input type="text" placeholder="Seu nome completo">
+        <input type="text" placeholder="Seu nome completo" id="name">
       </div>
 
       <div class="form-group">
         <label>Idade</label>
-        <input type="number" placeholder="Sua idade">
+        <input type="number" placeholder="Sua idade" id="age">
       </div>
 
       <div class="form-group">
         <label>Email</label>
-        <input type="email" placeholder="seu@email.com">
+        <input type="email" placeholder="seu@email.com" id="email">
       </div>
 
       <div class="form-group">
         <label>Senha</label>
-        <input type="password" placeholder="********">
+        <input type="password" placeholder="********" id="password">
       </div>
 
       <div class="form-group">
         <label>Confirmar senha</label>
-        <input type="password" placeholder="********">
+        <input type="password" placeholder="********" id="passwordConfirm">
       </div>
 
       <button class="btn" type="submit">
@@ -43,9 +43,10 @@
     </form>
 
     <div class="footer-text">
-      Já tem conta? <a href="#">Entrar</a>
+      Já tem conta? <a href="login.html">Entrar</a>
     </div>
   </div>
+  <script type="module" src="/auth/register.js" ></script>
 
 </body>
 </html>

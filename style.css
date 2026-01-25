@@ -86,6 +86,19 @@ body {
   margin: 0 auto;
 }
 
+#tela-dashboard {
+  display: flex;
+  justify-content: center;
+}
+
+.hero {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+
 /* TITULOS */
 h2 {
   font-size: 28px;
@@ -231,3 +244,70 @@ input:focus, select:focus {
   border-radius: 10px;
   cursor: pointer;
 }
+
+
+
+.hero-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+/* TEXTO ESQUERDA */
+.hero-text h1 {
+  font-size: 52px;
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+
+.hero-text p {
+  font-size: 16px;
+  color: var(--text-muted);
+  max-width: 420px;
+}
+
+/* CARDS DIREITA */
+.hero-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.card-dashboard {
+  background: var(--glass);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+}
+
+.card-dashboard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+}
+
+.card-dashboard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0.15),
+    rgba(255,255,255,0)
+  );
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.card-dashboard:hover::after {
+  opacity: 1;
+}
+
