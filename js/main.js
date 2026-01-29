@@ -27,8 +27,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.querySelectorAll(".nav-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       menuOn(btn);
-      if (text === "sair") return;
       const text = btn.innerText.toLowerCase().trim(); 
+      if (text === "sair") return;
       if (text === "dashboard") showScreen("dashboard");
       else if (text === "registros") showScreen("lista");
       

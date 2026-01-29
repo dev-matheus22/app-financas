@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aplicativo de finanças</title>
+  <title>Flux finance</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <header class="navbar">
-    <span class="app-title">Aplicativo de finanças</span>
+    <span class="app-title">Flux finance</span>
     <div class="nav-actions">
       <button class="nav-btn active">Dashboard</button>
       <button class="nav-btn">Registros</button>
@@ -20,35 +22,35 @@
 
   <!-- DASHBOARD -->
   <section id="tela-dashboard" class="tela hero">
-  <div class="hero">
-    <div class="hero-container">
-      <div class="hero-text">
-        <h1>Controle suas finanças com clareza</h1>
-        <p>
-          Visualize gastos, receitas e metas em um único painel moderno e minimalista.
-        </p>
-      </div>
-      <div class="hero-cards">
-        <div class="card-dashboard">
-          <span class="metric-title">Saldo Atual</span>
-          <span class="metric-value" id="saldo">R$ 0,00</span>
+    <div class="hero">
+      <div class="hero-container">
+        <div class="hero-text">
+          <h1>Controle suas finanças com clareza</h1>
+          <p>
+            Visualize gastos, receitas e metas em um único painel moderno e minimalista.
+          </p>
         </div>
-        <div class="card-dashboard">
-          <span class="metric-title">Entradas</span>
-          <span class="metric-value" id="totalEntradas">R$ 0,00</span>
-        </div>
-        <div class="card-dashboard">
-          <span class="metric-title">Despesas</span>
-          <span class="metric-value" id="totalDespesas">R$ 0,00</span>
-        </div>
-        <div class="card-dashboard">
-          <span class="metric-title">% Gasto</span>
-          <span class="metric-value" id="percentualGasto">0%</span>
+        <div class="hero-cards">
+          <div class="card-dashboard">
+            <span class="metric-title">Saldo Atual</span>
+            <span class="metric-value" id="saldo">R$ 0,00</span>
+          </div>
+          <div class="card-dashboard">
+            <span class="metric-title">Entradas</span>
+            <span class="metric-value" id="totalEntradas">R$ 0,00</span>
+          </div>
+          <div class="card-dashboard">
+            <span class="metric-title">Despesas</span>
+            <span class="metric-value" id="totalDespesas">R$ 0,00</span>
+          </div>
+          <div class="card-dashboard">
+            <span class="metric-title">% Gasto</span>
+            <span class="metric-value" id="percentualGasto">0%</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 
   <!-- LISTA -->
@@ -71,8 +73,18 @@
       </div>
       <div class="input-group">
         <label>Categoria</label>
-        <input type="text" id="categoria">
+        <select id="categoria">
+          <option value="">Selecione...</option>
+          <option value="moradia">Moradia</option>
+          <option value="alimentacao">Alimentação</option>
+          <option value="transporte">Transporte</option>
+          <option value="lazer">Lazer</option>
+          <option value="saude">Saúde</option>
+          <option value="educacao">Educação</option>
+          <option value="outros">Outros</option>
+        </select>
       </div>
+
       <div class="input-group">
         <label>Tipo</label>
         <select id="tipo">

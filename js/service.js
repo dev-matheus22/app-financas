@@ -17,26 +17,30 @@ export const logout = async () => {
   try {
     await signOut(auth);
     console.log("User signed out successfully!");
+    return { success: true }
   } catch (error) {
-    console.error("Sign out error:", error);
+    console.error("Erro ao deslogar", error);
+    return { success: false, error: "Erro ao deslogar" }
   }
 };
 
 
 export const editRegister = async (id, uid) => {
-  const registers = await getRegisters(uid);
+  const { success, registers, error } = await getRegisters(uid)
+  if (!success) return { success: false, error }
   const item = registers.find(l => l.id === id);
   return item ? { success: true, item } : { success: false, error: "Registro não encontrado" };
 }
 
 
 export const getUid = () => {
-const user = getAuth().currentUser;
+  const user = getAuth().currentUser;
   if (!user) {
     console.warn("getUid chamado mas nenhum usuário está logado ainda.");
-    return null; 
+    return { success: false, error: "Erro ao obter o usuário logado" };
   }
-  return user.uid;
+  const uid = user.uid
+  return { success: true, uid }
 }
 
 export const verifyRegister = (objEmValidacao) => {
@@ -53,10 +57,12 @@ export const verifyRegister = (objEmValidacao) => {
 export const saveRegister = async (objInput, id = null) => {
   const erro = verifyRegister(objInput);
   if (erro) {
-    return { success: false, error: erro };
+    return { success: false, error: "Erro ao verificar dados" };
   }
 
-  const uid = getUid();
+  const { success, uid, error } = getUid();
+  if (!success) return { success: false, error }; // aborta se não tem usuário
+
 
   if (id === null) {
     try {
@@ -71,11 +77,11 @@ export const saveRegister = async (objInput, id = null) => {
       });
       return { success: true };
     } catch (error) {
-      alert("Erro ao criar registro");
       console.error(error);
+      return { success: false, error: "Erro ao salvar o registro" }
     }
   } else {
-    try{
+    try {
       const docRef = doc(db, "registers", id)
       await updateDoc(docRef, {
         valor: objInput.valor,
@@ -87,38 +93,37 @@ export const saveRegister = async (objInput, id = null) => {
       })
       return { success: true };
     } catch (error) {
-      alert("Erro ao criar registro");
       console.error(error);
-  } 
-};
+      return { success: false, error: "Erro ao salvar o registro" }
+    }
+  };
 }
 
 export const deleteRegister = async (id) => {
-const registerRef = doc(db, "registers", id)
-try{
-  await deleteDoc(registerRef)
-  return { success: true}
-} catch (error){
- alert("Erro ao remover registro")
- console.error(error)
- return {success: false, error:"Erro ao remover registro"}
-}
+  const registerRef = doc(db, "registers", id)
+  try {
+    await deleteDoc(registerRef)
+    return { success: true }
+  } catch (error) {
+    console.error(error)
+    return { success: false, error: "Erro ao remover registro" }
+  }
 };
 
-export const getRegisters = async(uid) => {
-const registers = []
-try{
-  const q = query(
-    collection(db, "registers"),
-    where("uid", "==", uid)
-  )
-  const querySnapshot = await getDocs(q)
-  querySnapshot.forEach(doc => {
-    registers.push({id: doc.id, ...doc.data()})
-  })
-  return registers
-} catch (error){
-  console.error(error)
-  alert("Erro ao obter os registros")
-}
+export const getRegisters = async (uid) => {
+  const registers = []
+  try {
+    const q = query(
+      collection(db, "registers"),
+      where("uid", "==", uid)
+    )
+    const querySnapshot = await getDocs(q)
+    querySnapshot.forEach(doc => {
+      registers.push({ id: doc.id, ...doc.data() })
+    })
+    return { success: true, registers }
+  } catch (error) {
+    console.error(error)
+    return { success: false, error: "Erro ao obter registros" }
+  }
 }
