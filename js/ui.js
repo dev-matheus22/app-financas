@@ -5,7 +5,17 @@ import {
   getRegisters,
   getUid,
 } from "./service.js";
+
 let idEmEdicao = null;
+let chartCategorias = null;
+
+
+const menuOn = (activeBtn) => {
+  document
+    .querySelectorAll(".nav-btn")
+    .forEach((btn) => btn.classList.remove("active"));
+  activeBtn.classList.add("active");
+};
 
 const dataInput = async () => {
   let valor = Number(document.getElementById("valor").value.trim());
@@ -14,29 +24,27 @@ const dataInput = async () => {
   let tipo = document.getElementById("tipo").value.trim().toLowerCase();
   let data = document.getElementById("data").value;
 
-  const objInput = {
-    valor: valor,
-    descricao: descricao,
-    categoria: categoria,
-    tipo: tipo,
-    data: data,
-  };
-  const { success: uidSuccess, uid, error: uidError } = getUid();
-  if (!uidSuccess) {
-    alert(uidError);
-    return;
+  const objInput = { valor, descricao, categoria, tipo, data };
+
+  const uidResult = getUid();
+  if (!uidResult.success) {
+    alert(uidResult.error.message);
+    return uidResult;
   }
 
+  const uid = uidResult.data.uid;
   const result = await saveRegister(objInput, idEmEdicao);
-  if (result.success === false) {
-    return { success: false, error: result.error };
-  } else {
-    cleanForm();
-    idEmEdicao = null;
-    await showList(uid);
-    await loadDashboard(uid);
-    showScreen("lista");
+
+  if (!result.success) {
+    return result;
   }
+
+  cleanForm();
+  idEmEdicao = null;
+  await showList(uid);
+  await loadDashboard(uid);
+  showScreen("lista");
+
   return result;
 };
 
@@ -52,28 +60,32 @@ const fillForm = async (uid, id = null) => {
   if (!id) return;
 
   const result = await editRegister(id, uid);
-  if (result.success) {
-    const item = result.item;
-    idEmEdicao = item.id;
-
-    document.getElementById("valor-edit").value = item.valor;
-    document.getElementById("descricao-edit").value = item.descricao;
-    document.getElementById("categoria-edit").value = item.categoria;
-    document.getElementById("tipo-edit").value = item.tipo;
-    document.getElementById("data-edit").value = item.data;
-    showScreen("editar");
-  } else {
-    alert("Erro ao recuperar dados: " + result.error);
+  if (!result.success) {
+    alert(result.error.message);
+    return result;
   }
+
+  const item = result.data.register;
+  idEmEdicao = item.id;
+
+  document.getElementById("valor-edit").value = item.valor;
+  document.getElementById("descricao-edit").value = item.descricao;
+  document.getElementById("categoria-edit").value = item.categoria;
+  document.getElementById("tipo-edit").value = item.tipo;
+  document.getElementById("data-edit").value = item.data;
+
+  showScreen("tela-editar");
+  return result;
 };
 
 const showList = async (uid) => {
-  const { success, registers, error } = await getRegisters(uid);
-  if (!success) {
-    alert(error);
-    return;
+  const result = await getRegisters(uid);
+  if (!result.success) {
+    alert(result.error.message);
+    return result;
   }
 
+  const registers = result.data.registers;
   let lancamentoList = document.getElementById("lancamentoList");
   lancamentoList.innerHTML = "";
 
@@ -83,12 +95,9 @@ const showList = async (uid) => {
     let addButton = document.createElement("button");
 
     addButton.innerText = "Registrar";
-    addButton.addEventListener("click", function () {
-      showScreen("adicionar");
-    });
+    addButton.addEventListener("click", () => showScreen("adicionar"));
 
     paragrafo.innerText = "Que tal adicionar uma entrada/despesa?";
-
     paragrafo.classList.add("paragrafo");
     card.classList.add("empty-card");
     addButton.classList.add("btn");
@@ -97,114 +106,86 @@ const showList = async (uid) => {
     card.appendChild(addButton);
     lancamentoList.appendChild(card);
 
-    return;
-  } else {
-    for (const lancamento of registers) {
-      let card = document.createElement("div");
-      let spanData = document.createElement("span");
-      let spanCatTip = document.createElement("span");
-      let spanDescricao = document.createElement("span");
-      let spanValor = document.createElement("span");
-      let editButton = document.createElement("button");
-      let removeButton = document.createElement("button");
+    return result;
+  }
 
-      let buttonContainer = document.createElement("div");
-      buttonContainer.classList.add("card-buttons");
+  for (const lancamento of registers) {
+    let card = document.createElement("div");
+    let spanData = document.createElement("span");
+    let spanCatTip = document.createElement("span");
+    let spanDescricao = document.createElement("span");
+    let spanValor = document.createElement("span");
+    let editButton = document.createElement("button");
+    let removeButton = document.createElement("button");
+    let buttonContainer = document.createElement("div");
 
-      editButton.innerText = "Editar";
-      removeButton.innerText = "Remover";
+    buttonContainer.classList.add("card-buttons");
+    editButton.innerText = "Editar";
+    removeButton.innerText = "Remover";
 
-      const { success: uidSuccess, uid, error: uidError } = getUid();
-      if (!uidSuccess) return alert(uidError);
+    editButton.addEventListener("click", async () => {
+      await fillForm(uid, lancamento.id);
+    });
 
-      editButton.addEventListener("click", async () => {
-        await fillForm(uid, lancamento.id);
-      });
+    removeButton.addEventListener("click", async () => {
+      const del = await deleteRegister(lancamento.id);
+      if (!del.success) return alert(del.error.message);
+      await showList(uid);
+      await loadDashboard(uid);
+    });
 
-      removeButton.addEventListener("click", async () => {
-        const result = await deleteRegister(lancamento.id);
-        if (!result.success) return alert(result.error);
-        await showList(uid);
-        await loadDashboard(uid);
-      });
+    card.classList.add(
+      "full-card",
+      lancamento.tipo === "entrada" ? "entrada-card" : "despesa-card",
+    );
 
-      card.classList.add("full-card");
+    spanData.innerText = lancamento.data;
+    spanCatTip.innerText = `${lancamento.categoria} | ${lancamento.tipo}`;
+    spanDescricao.innerText = lancamento.descricao;
+    spanValor.innerText = `R$${lancamento.valor.toFixed(2)}`;
 
-      if (lancamento.tipo === "entrada") {
-        card.classList.add("entrada-card");
-      } else if (lancamento.tipo === "despesa") {
-        card.classList.add("despesa-card");
-      }
+    spanData.classList.add("data-format");
+    spanDescricao.classList.add("descricao-format");
+    spanCatTip.classList.add("categoria-tipo-format");
+    spanValor.classList.add("valor-format");
 
-      spanData.classList.add("data-format");
-      spanCatTip.classList.add("categoria-tipo-format");
-      spanDescricao.classList.add("descricao-format");
-      spanValor.classList.add("valor-format");
-      editButton.classList.add("small-btn", "edit");
-      removeButton.classList.add("small-btn", "remove");
+    editButton.classList.add("small-btn");
+    removeButton.classList.add("small-btn");
 
-      spanData.innerText = lancamento.data;
-      spanCatTip.innerText = `${lancamento.categoria} | ${lancamento.tipo} `;
-      spanDescricao.innerText = lancamento.descricao;
-      spanValor.innerText = `R$${lancamento.valor.toFixed(2)}`; //
+    card.append(spanData, spanDescricao, spanCatTip, spanValor);
+    buttonContainer.append(editButton, removeButton);
+    card.appendChild(buttonContainer);
+    lancamentoList.appendChild(card);
+  }
 
-      card.appendChild(spanData);
-      card.appendChild(spanDescricao);
-      card.appendChild(spanCatTip);
-      card.appendChild(spanValor);
+  return result;
+};
+const showScreen = (screenId) => {
+  document.querySelectorAll(".tela").forEach((section) => {
+    section.style.display = "none";
+  });
 
-      buttonContainer.appendChild(editButton);
-      buttonContainer.appendChild(removeButton);
-      card.appendChild(buttonContainer);
-
-      lancamentoList.appendChild(card);
-    }
+  const active = document.getElementById(screenId);
+  if (active) {
+    active.style.display = "block";
   }
 };
-
-export const showScreen = async (tela) => {
-  let telas = ["dashboard", "adicionar", "editar", "lista"];
-  const { success: uidSuccess, uid, error: uidError } = getUid();
-  if (!uidSuccess) {
-    alert(uidError);
-    return;
-  }
-
-  for (const nomeTela of telas) {
-    let divTela = document.getElementById("tela-" + nomeTela);
-
-    if (nomeTela === tela) {
-      divTela.style.display = "block";
-
-      if (tela === "dashboard") {
-        await loadDashboard(uid);
-      }
-    } else {
-      divTela.style.display = "none";
-    }
-  }
-};
-
 
 const loadDashboard = async (uid) => {
-  const { success, registers, error } = await getRegisters(uid);
-  if (!success) {
-    alert(error);
-    return;
+  const result = await getRegisters(uid);
+  if (!result.success) {
+    alert(result.error.message);
+    return result;
   }
 
-  let entrada = registers.filter((item) => item.tipo === "entrada");
-  let despesa = registers.filter((item) => item.tipo === "despesa");
-  let totalEntrada = entrada.reduce((acc, curr) => acc + curr.valor, 0);
-  let totalDespesa = despesa.reduce((acc, curr) => acc + curr.valor, 0);
+  const registers = result.data.registers;
+  let entrada = registers.filter((i) => i.tipo === "entrada");
+  let despesa = registers.filter((i) => i.tipo === "despesa");
+
+  let totalEntrada = entrada.reduce((a, c) => a + c.valor, 0);
+  let totalDespesa = despesa.reduce((a, c) => a + c.valor, 0);
   let saldo = totalEntrada - totalDespesa;
-  let percentual = 0;
-
-  if (totalEntrada > 0) {
-    percentual = (totalDespesa / totalEntrada) * 100;
-  } else {
-    percentual = 0;
-  }
+  let percentual = totalEntrada > 0 ? (totalDespesa / totalEntrada) * 100 : 0;
 
   document.getElementById("totalEntradas").innerText =
     `R$${totalEntrada.toFixed(2)}`;
@@ -213,12 +194,60 @@ const loadDashboard = async (uid) => {
   document.getElementById("saldo").innerText = `R$${saldo.toFixed(2)}`;
   document.getElementById("percentualGasto").innerText =
     `${percentual.toFixed(2)}%`;
+
+    renderCategoryChart(registers);
+
+
+  return {
+    success: true,
+    data: { totalEntrada, totalDespesa, saldo, percentual },
+  };
 };
 
-export const menuOn = (btnClicado) => {
-  const botoes = document.querySelectorAll(".nav-btn");
-  botoes.forEach((btn) => btn.classList.remove("active")); // remove ativo de todos
-  btnClicado.classList.add("active"); // adiciona ao clicado
+const renderCategoryChart = (registers) => {
+  const despesas = registers.filter(r => r.tipo === "despesa");
+
+  const categorias = {};
+
+  despesas.forEach(d => {
+    categorias[d.categoria] = (categorias[d.categoria] || 0) + d.valor;
+  });
+
+  const labels = Object.keys(categorias);
+  const series = Object.values(categorias);
+
+  const options = {
+    chart: {
+      type: "donut",
+      height: 300
+    },
+    labels,
+    series,
+    theme: {
+      mode: ""
+    },
+    legend: {
+      position: "bottom"
+    },
+    dataLabels: {
+      enabled: true
+    }
+  };
+
+  if (chartCategorias) {
+    chartCategorias.updateOptions({
+      labels,
+      series
+    });
+    return;
+  }
+
+  chartCategorias = new ApexCharts(
+    document.querySelector("#chart-categorias"),
+    options
+  );
+
+  chartCategorias.render();
 };
 
-export { dataInput, fillForm, loadDashboard, showList };
+export { dataInput, fillForm, loadDashboard, showList, menuOn, showScreen };

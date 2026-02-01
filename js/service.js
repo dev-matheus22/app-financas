@@ -16,32 +16,47 @@ export const logout = async () => {
   const auth = getAuth();
   try {
     await signOut(auth);
-    console.log("User signed out successfully!");
-    return { success: true }
+    return {
+      success: true,
+      data: { action: "logout" }
+    };
   } catch (error) {
     console.error("Erro ao deslogar", error);
-    return { success: false, error: "Erro ao deslogar" }
+    return {
+      success: false,
+      error: { message: "Erro ao deslogar", code: "AUTH_LOGOUT" }
+    };
   }
 };
 
-
 export const editRegister = async (id, uid) => {
-  const { success, registers, error } = await getRegisters(uid)
-  if (!success) return { success: false, error }
-  const item = registers.find(l => l.id === id);
-  return item ? { success: true, item } : { success: false, error: "Registro não encontrado" };
-}
+  const { success, data, error } = await getRegisters(uid);
+  if (!success) return { success: false, error };
 
+  const item = data.registers.find(l => l.id === id);
+
+  return item
+    ? { success: true, data: { register: item } }
+    : {
+        success: false,
+        error: { message: "Registro não encontrado", code: "REGISTER_NOT_FOUND" }
+      };
+};
 
 export const getUid = () => {
   const user = getAuth().currentUser;
   if (!user) {
-    console.warn("getUid chamado mas nenhum usuário está logado ainda.");
-    return { success: false, error: "Erro ao obter o usuário logado" };
+    return {
+      success: false,
+      error: { message: "Usuário não autenticado", code: "AUTH_NO_USER" }
+    };
   }
-  const uid = user.uid
-  return { success: true, uid }
-}
+
+  return {
+    success: true,
+    data: { uid: user.uid }
+  };
+};
 
 export const verifyRegister = (objEmValidacao) => {
   if (!objEmValidacao.valor || isNaN(Number(objEmValidacao.valor)))
@@ -57,12 +72,16 @@ export const verifyRegister = (objEmValidacao) => {
 export const saveRegister = async (objInput, id = null) => {
   const erro = verifyRegister(objInput);
   if (erro) {
-    return { success: false, error: "Erro ao verificar dados" };
+    return {
+      success: false,
+      error: { message: "Erro ao verificar dados", code: "VALIDATION_ERROR" }
+    };
   }
 
-  const { success, uid, error } = getUid();
-  if (!success) return { success: false, error }; // aborta se não tem usuário
+  const { success, data, error } = getUid();
+  if (!success) return { success: false, error };
 
+  const uid = data.uid;
 
   if (id === null) {
     try {
@@ -75,14 +94,21 @@ export const saveRegister = async (objInput, id = null) => {
         tipo: objInput.tipo,
         createdAt: Timestamp.now()
       });
-      return { success: true };
+
+      return {
+        success: true,
+        data: { id: docRef.id, action: "created" }
+      };
     } catch (error) {
       console.error(error);
-      return { success: false, error: "Erro ao salvar o registro" }
+      return {
+        success: false,
+        error: { message: "Erro ao salvar o registro", code: "FIRESTORE_CREATE" }
+      };
     }
   } else {
     try {
-      const docRef = doc(db, "registers", id)
+      const docRef = doc(db, "registers", id);
       await updateDoc(docRef, {
         valor: objInput.valor,
         categoria: objInput.categoria,
@@ -90,40 +116,64 @@ export const saveRegister = async (objInput, id = null) => {
         data: objInput.data,
         tipo: objInput.tipo,
         updatedAt: Timestamp.now()
-      })
-      return { success: true };
+      });
+
+      return {
+        success: true,
+        data: { id, action: "updated" }
+      };
     } catch (error) {
       console.error(error);
-      return { success: false, error: "Erro ao salvar o registro" }
+      return {
+        success: false,
+        error: { message: "Erro ao salvar o registro", code: "FIRESTORE_UPDATE" }
+      };
     }
-  };
-}
+  }
+};
 
 export const deleteRegister = async (id) => {
-  const registerRef = doc(db, "registers", id)
+  const registerRef = doc(db, "registers", id);
   try {
-    await deleteDoc(registerRef)
-    return { success: true }
+    await deleteDoc(registerRef);
+    return {
+      success: true,
+      data: { id, action: "deleted" }
+    };
   } catch (error) {
-    console.error(error)
-    return { success: false, error: "Erro ao remover registro" }
+    console.error(error);
+    return {
+      success: false,
+      error: { message: "Erro ao remover registro", code: "FIRESTORE_DELETE" }
+    };
   }
 };
 
 export const getRegisters = async (uid) => {
-  const registers = []
+  const registers = [];
   try {
     const q = query(
       collection(db, "registers"),
       where("uid", "==", uid)
-    )
-    const querySnapshot = await getDocs(q)
+    );
+
+    const querySnapshot = await getDocs(q);
     querySnapshot.forEach(doc => {
-      registers.push({ id: doc.id, ...doc.data() })
-    })
-    return { success: true, registers }
+      registers.push({ id: doc.id, ...doc.data() });
+    });
+
+    return {
+      success: true,
+      data: {
+        registers,
+        total: registers.length
+      }
+    };
   } catch (error) {
-    console.error(error)
-    return { success: false, error: "Erro ao obter registros" }
+    console.error(error);
+    return {
+      success: false,
+      error: { message: "Erro ao obter registros", code: "FIRESTORE_READ" }
+    };
   }
-}
+};

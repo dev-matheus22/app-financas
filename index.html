@@ -1,138 +1,139 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flux finance</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flux finance</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+  <body>
+    <header class="navbar">
+      <span class="app-title">Flux finance</span>
+      <div class="nav-actions">
+        <button class="nav-btn active" type="button">Dashboard</button>
+        <button class="nav-btn" type="button">Registros</button>
+        <button class="nav-btn" type="button">Novo</button>
+        <button class="nav-btn" id="btn-logout">Sair</button>
+      </div>
+    </header>
 
-<body>
-
-  <header class="navbar">
-    <span class="app-title">Flux finance</span>
-    <div class="nav-actions">
-      <button class="nav-btn active">Dashboard</button>
-      <button class="nav-btn">Registros</button>
-      <button class="nav-btn">Novo</button>
-      <button class="nav-btn">Sair</button>
-    </div>
-  </header>
-
-  <!-- DASHBOARD -->
-  <section id="tela-dashboard" class="tela hero">
-    <div class="hero">
-      <div class="hero-container">
-        <div class="hero-text">
-          <h1>Controle suas finanças com clareza</h1>
-          <p>
-            Visualize gastos, receitas e metas em um único painel moderno e minimalista.
-          </p>
+    <!-- DASHBOARD -->
+    <section id="tela-dashboard" class="tela hero">
+      <div class="hero">
+        <div class="hero-container">
+          <div class="hero-text">
+            <h1>Controle suas finanças com clareza</h1>
+            <p>
+              Visualize gastos, receitas e metas no painel e no gráfico abaixo.
+            </p>
+          </div>
+          <div class="hero-cards">
+            <div class="card-dashboard">
+              <span class="metric-title">Saldo Atual</span>
+              <span class="metric-value" id="saldo">R$ 0,00</span>
+            </div>
+            <div class="card-dashboard">
+              <span class="metric-title">Entradas</span>
+              <span class="metric-value" id="totalEntradas">R$ 0,00</span>
+            </div>
+            <div class="card-dashboard">
+              <span class="metric-title">Despesas</span>
+              <span class="metric-value" id="totalDespesas">R$ 0,00</span>
+            </div>
+            <div class="card-dashboard">
+              <span class="metric-title">% Gasto</span>
+              <span class="metric-value" id="percentualGasto">0%</span>
+            </div>
+          </div>
         </div>
-        <div class="hero-cards">
-          <div class="card-dashboard">
-            <span class="metric-title">Saldo Atual</span>
-            <span class="metric-value" id="saldo">R$ 0,00</span>
-          </div>
-          <div class="card-dashboard">
-            <span class="metric-title">Entradas</span>
-            <span class="metric-value" id="totalEntradas">R$ 0,00</span>
-          </div>
-          <div class="card-dashboard">
-            <span class="metric-title">Despesas</span>
-            <span class="metric-value" id="totalDespesas">R$ 0,00</span>
-          </div>
-          <div class="card-dashboard">
-            <span class="metric-title">% Gasto</span>
-            <span class="metric-value" id="percentualGasto">0%</span>
-          </div>
+      </div>
+      <div class="card-dashboard" style="margin-top: 30px">
+          <span class="metric-title">Gastos por categoria</span>
+          <div id="chart-categorias"></div>
         </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
+    <!-- LISTA -->
+    <section id="tela-lista" class="tela">
+      <h2>Registros Financeiros</h2>
+      <div id="lancamentoList"></div>
+    </section>
 
-  <!-- LISTA -->
-  <section id="tela-lista" class="tela">
-    <h2>Registros Financeiros</h2>
-    <div id="lancamentoList"></div>
-  </section>
+    <!-- NOVO REGISTRO -->
+    <section id="tela-adicionar" class="tela">
+      <h2>Novo Registro</h2>
+      <div class="form-card">
+        <div class="input-group">
+          <label>Valor</label>
+          <input type="number" id="valor" />
+        </div>
+        <div class="input-group">
+          <label>Descrição</label>
+          <input type="text" id="descricao" />
+        </div>
+        <div class="input-group">
+          <label>Categoria</label>
+          <select id="categoria">
+            <option value="">Selecione...</option>
+            <option value="moradia">Moradia</option>
+            <option value="alimentacao">Alimentação</option>
+            <option value="transporte">Transporte</option>
+            <option value="lazer">Lazer</option>
+            <option value="saude">Saúde</option>
+            <option value="educacao">Educação</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
 
-  <!-- NOVO REGISTRO -->
-  <section id="tela-adicionar" class="tela">
-    <h2>Novo Registro</h2>
-    <div class="form-card">
-      <div class="input-group">
-        <label>Valor</label>
-        <input type="number" id="valor">
+        <div class="input-group">
+          <label>Tipo</label>
+          <select id="tipo">
+            <option value="entrada">Entrada</option>
+            <option value="despesa">Despesa</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Data</label>
+          <input type="date" id="data" />
+        </div>
+        <button id="btn-salvar" class="btn btn-success">Salvar</button>
       </div>
-      <div class="input-group">
-        <label>Descrição</label>
-        <input type="text" id="descricao">
-      </div>
-      <div class="input-group">
-        <label>Categoria</label>
-        <select id="categoria">
-          <option value="">Selecione...</option>
-          <option value="moradia">Moradia</option>
-          <option value="alimentacao">Alimentação</option>
-          <option value="transporte">Transporte</option>
-          <option value="lazer">Lazer</option>
-          <option value="saude">Saúde</option>
-          <option value="educacao">Educação</option>
-          <option value="outros">Outros</option>
-        </select>
-      </div>
+    </section>
 
-      <div class="input-group">
-        <label>Tipo</label>
-        <select id="tipo">
-          <option value="entrada">Entrada</option>
-          <option value="despesa">Despesa</option>
-        </select>
+    <!-- EDITAR -->
+    <section id="tela-editar" class="tela">
+      <h2>Editar Registro</h2>
+      <div class="form-card">
+        <div class="input-group">
+          <label>Valor</label>
+          <input type="number" id="valor-edit" />
+        </div>
+        <div class="input-group">
+          <label>Descrição</label>
+          <input type="text" id="descricao-edit" />
+        </div>
+        <div class="input-group">
+          <label>Categoria</label>
+          <input type="text" id="categoria-edit" />
+        </div>
+        <div class="input-group">
+          <label>Tipo</label>
+          <select id="tipo-edit">
+            <option value="entrada">Entrada</option>
+            <option value="despesa">Despesa</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Data</label>
+          <input type="date" id="data-edit" />
+        </div>
+        <button id="btn-atualizar" class="btn btn-success">Atualizar</button>
       </div>
-      <div class="input-group">
-        <label>Data</label>
-        <input type="date" id="data">
-      </div>
-      <button id="btn-salvar" class="btn btn-success">Salvar</button>
-    </div>
-  </section>
+    </section>
 
-  <!-- EDITAR -->
-  <section id="tela-editar" class="tela">
-    <h2>Editar Registro</h2>
-    <div class="form-card">
-      <div class="input-group">
-        <label>Valor</label>
-        <input type="number" id="valor-edit">
-      </div>
-      <div class="input-group">
-        <label>Descrição</label>
-        <input type="text" id="descricao-edit">
-      </div>
-      <div class="input-group">
-        <label>Categoria</label>
-        <input type="text" id="categoria-edit">
-      </div>
-      <div class="input-group">
-        <label>Tipo</label>
-        <select id="tipo-edit">
-          <option value="entrada">Entrada</option>
-          <option value="despesa">Despesa</option>
-        </select>
-      </div>
-      <div class="input-group">
-        <label>Data</label>
-        <input type="date" id="data-edit">
-      </div>
-      <button id="btn-atualizar" class="btn btn-success">Atualizar</button>
-    </div>
-  </section>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-  <!-- Módulos JS -->
-  <script type="module" src="/js/main.js"></script>
-</body>
-
+    <script type="module" src="/js/main.js"></script>
+  </body>
 </html>
