@@ -10,100 +10,96 @@ import {
   where,
   Timestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { verifyRegister } from "./validate.js";
+import { getUid } from "../auth/auth.js";
+import { dataInput } from "./ui.js";
 
-export const logout = async () => {
-  const auth = getAuth();
+
+export const getRegister = async (id) => {
   try {
-    await signOut(auth);
-    console.log("User signed out successfully!");
-    return { success: true }
+    const docRef = doc(db, "registers", id)
+
+    const docSnap = await getDoc(docRef)
+
+    if (docSnap.exists()) {
+      let register = docSnap.data()
+      return {
+        success: true,
+        data: {
+          id: docSnap.id,
+          ...docSnap.data()
+        }
+      }
+    } else {
+      return { success: false, error: "Dados não encontrados" };
+    }
   } catch (error) {
-    console.error("Erro ao deslogar", error);
-    return { success: false, error: "Erro ao deslogar" }
+    console.error(error);
+    return { success: false, error: "Erro ao atualizar registro" }
   }
-};
+}
+
+export const updateRegister = async (id, objInput) => {
+  const erro = verifyRegister(objInput)
+  if (erro) {
+    return { success: false, error: "Erro ao verificar dados" };
+  }
+  const { valor, categoria, descricao, data, tipo } = objInput
 
 
-export const editRegister = async (id, uid) => {
-  const { success, registers, error } = await getRegisters(uid)
-  if (!success) return { success: false, error }
-  const item = registers.find(l => l.id === id);
-  return item ? { success: true, item } : { success: false, error: "Registro não encontrado" };
+  try {
+    await updateDoc(doc(db, "registers", id), {
+      valor,
+      categoria,
+      descricao,
+      data,
+      tipo
+    })
+    return { success: true, msg: "Registro atualizado com sucesso" }
+  } catch (error) {
+    console.error(error);
+    return { success: false, error }
+  }
+
 }
 
 
-export const getUid = () => {
-  const user = getAuth().currentUser;
-  if (!user) {
-    console.warn("getUid chamado mas nenhum usuário está logado ainda.");
-    return { success: false, error: "Erro ao obter o usuário logado" };
-  }
-  const uid = user.uid
-  return { success: true, uid }
-}
-
-export const verifyRegister = (objEmValidacao) => {
-  if (!objEmValidacao.valor || isNaN(Number(objEmValidacao.valor)))
-    return "Valor inválido";
-  if (!objEmValidacao.categoria) return "Categoria inválida";
-  if (!objEmValidacao.descricao) return "Descrição inválida";
-  if (!objEmValidacao.data) return "Data inválida";
-  if (objEmValidacao.tipo !== "entrada" && objEmValidacao.tipo !== "despesa")
-    return "Tipo inválido";
-  return null;
-};
-
-export const saveRegister = async (objInput, id = null) => {
+export const createRegister = async (objInput) => {
   const erro = verifyRegister(objInput);
   if (erro) {
     return { success: false, error: "Erro ao verificar dados" };
   }
 
-  const { success, uid, error } = getUid();
+  const { success, uid, error } = await getUid();
   if (!success) return { success: false, error }; // aborta se não tem usuário
 
 
-  if (id === null) {
-    try {
-      const docRef = await addDoc(collection(db, "registers"), {
-        uid,
-        valor: objInput.valor,
-        categoria: objInput.categoria,
-        descricao: objInput.descricao,
-        data: objInput.data,
-        tipo: objInput.tipo,
-        createdAt: Timestamp.now()
-      });
-      return { success: true };
-    } catch (error) {
-      console.error(error);
-      return { success: false, error: "Erro ao salvar o registro" }
-    }
-  } else {
-    try {
-      const docRef = doc(db, "registers", id)
-      await updateDoc(docRef, {
-        valor: objInput.valor,
-        categoria: objInput.categoria,
-        descricao: objInput.descricao,
-        data: objInput.data,
-        tipo: objInput.tipo,
-        updatedAt: Timestamp.now()
-      })
-      return { success: true };
-    } catch (error) {
-      console.error(error);
-      return { success: false, error: "Erro ao salvar o registro" }
-    }
-  };
+  const { valor, categoria, descricao, data, tipo } = objInput
+
+  try {
+    await addDoc(collection(db, "registers"), {
+      uid,
+      valor,
+      categoria,
+      descricao,
+      data,
+      tipo,
+      createdAt: Timestamp.now()
+    });
+
+    return { success: true, msg: "Registro criado com sucesso" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Erro ao salvar o registro" }
+  }
 }
+
 
 export const deleteRegister = async (id) => {
   const registerRef = doc(db, "registers", id)
   try {
     await deleteDoc(registerRef)
-    return { success: true }
+    return { success: true, msg: "Registro deletado com sucesso" }
   } catch (error) {
     console.error(error)
     return { success: false, error: "Erro ao remover registro" }
@@ -121,7 +117,7 @@ export const getRegisters = async (uid) => {
     querySnapshot.forEach(doc => {
       registers.push({ id: doc.id, ...doc.data() })
     })
-    return { success: true, registers }
+    return { success: true, data: registers }
   } catch (error) {
     console.error(error)
     return { success: false, error: "Erro ao obter registros" }

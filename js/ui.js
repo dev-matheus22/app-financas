@@ -1,9 +1,10 @@
 import {
   deleteRegister,
-  saveRegister,
-  editRegister,
+  createRegister,
   getRegisters,
   getUid,
+  updateRegister,
+  getRegister,
 } from "./service.js";
 let idEmEdicao = null;
 
@@ -21,20 +22,19 @@ const dataInput = async () => {
     tipo: tipo,
     data: data,
   };
-  const { success: uidSuccess, uid, error: uidError } = getUid();
+  const { success: uidSuccess, uid, error: uidError } = await getUid();
   if (!uidSuccess) {
     alert(uidError);
     return;
   }
 
-  const result = await saveRegister(objInput, idEmEdicao);
+  const result = await createRegister(objInput);
   if (result.success === false) {
     return { success: false, error: result.error };
   } else {
     cleanForm();
     idEmEdicao = null;
-    await showList(uid);
-    await loadDashboard(uid);
+    await refreshUI(uid);
     showScreen("lista");
   }
   return result;
@@ -48,12 +48,12 @@ const cleanForm = () => {
   document.getElementById("data").value = "";
 };
 
-const fillForm = async (uid, id = null) => {
+const fillForm = async (id = null) => {
   if (!id) return;
 
-  const result = await editRegister(id, uid);
+  const result = await getRegister(id);
   if (result.success) {
-    const item = result.item;
+    const item = result.data;
     idEmEdicao = item.id;
 
     document.getElementById("valor-edit").value = item.valor;
@@ -67,8 +67,53 @@ const fillForm = async (uid, id = null) => {
   }
 };
 
+const getNewData = () => {
+  let newVal = Number(document.getElementById("valor-edit").value.trim());
+  let newDesc = document.getElementById("descricao-edit").value.trim();
+  let newCat = document.getElementById("categoria-edit").value.trim();
+  let newType = document.getElementById("tipo-edit").value.trim();
+  let newData = document.getElementById("data-edit").value.trim();
+
+  const objInput = {
+    valor: newVal,
+    descricao: newDesc,
+    categoria: newCat,
+    tipo: newType,
+    data: newData
+  }
+
+  return objInput
+}
+
+const refreshUI = async (uid) => {
+  await showList(uid)
+  await loadDashboard(uid)
+}
+
+document.getElementById("btn-atualizar").addEventListener("click", async () => {
+
+  const { uid, success } = await getUid()
+
+  if (!idEmEdicao) return
+
+  if (!uid) return
+
+  const objInput = getNewData()
+  const result = await updateRegister(idEmEdicao, objInput)
+
+  if (result.success) {
+    idEmEdicao = null
+    await refreshUI(uid)
+  } else {
+    return { success: false, error: "Erro ao atualizar registro" }
+  }
+
+  showScreen("lista")
+
+})
+
 const showList = async (uid) => {
-  const { success, registers, error } = await getRegisters(uid);
+  const { success, data, error } = await getRegisters(uid);
   if (!success) {
     alert(error);
     return;
@@ -77,7 +122,7 @@ const showList = async (uid) => {
   let lancamentoList = document.getElementById("lancamentoList");
   lancamentoList.innerHTML = "";
 
-  if (registers.length === 0) {
+  if (data.length === 0) {
     let card = document.createElement("div");
     let paragrafo = document.createElement("h4");
     let addButton = document.createElement("button");
@@ -99,7 +144,7 @@ const showList = async (uid) => {
 
     return;
   } else {
-    for (const lancamento of registers) {
+    for (const lancamento of data) {
       let card = document.createElement("div");
       let spanData = document.createElement("span");
       let spanCatTip = document.createElement("span");
@@ -114,18 +159,14 @@ const showList = async (uid) => {
       editButton.innerText = "Editar";
       removeButton.innerText = "Remover";
 
-      const { success: uidSuccess, uid, error: uidError } = getUid();
-      if (!uidSuccess) return alert(uidError);
-
       editButton.addEventListener("click", async () => {
-        await fillForm(uid, lancamento.id);
+        await fillForm(lancamento.id);
       });
 
       removeButton.addEventListener("click", async () => {
         const result = await deleteRegister(lancamento.id);
         if (!result.success) return alert(result.error);
-        await showList(uid);
-        await loadDashboard(uid);
+        await refreshUI(uid);
       });
 
       card.classList.add("full-card");
@@ -164,21 +205,12 @@ const showList = async (uid) => {
 
 export const showScreen = async (tela) => {
   let telas = ["dashboard", "adicionar", "editar", "lista"];
-  const { success: uidSuccess, uid, error: uidError } = getUid();
-  if (!uidSuccess) {
-    alert(uidError);
-    return;
-  }
 
   for (const nomeTela of telas) {
     let divTela = document.getElementById("tela-" + nomeTela);
 
     if (nomeTela === tela) {
       divTela.style.display = "block";
-
-      if (tela === "dashboard") {
-        await loadDashboard(uid);
-      }
     } else {
       divTela.style.display = "none";
     }
@@ -187,14 +219,14 @@ export const showScreen = async (tela) => {
 
 
 const loadDashboard = async (uid) => {
-  const { success, registers, error } = await getRegisters(uid);
+  const { success, data, error } = await getRegisters(uid);
   if (!success) {
     alert(error);
     return;
   }
 
-  let entrada = registers.filter((item) => item.tipo === "entrada");
-  let despesa = registers.filter((item) => item.tipo === "despesa");
+  let entrada = data.filter((item) => item.tipo === "entrada");
+  let despesa = data.filter((item) => item.tipo === "despesa");
   let totalEntrada = entrada.reduce((acc, curr) => acc + curr.valor, 0);
   let totalDespesa = despesa.reduce((acc, curr) => acc + curr.valor, 0);
   let saldo = totalEntrada - totalDespesa;
