@@ -2,21 +2,21 @@ import {
   dataInput,
   showScreen,
   menuOn,
-  fillForm,
-  loadDashboard,
-  showList,
+  refreshUi,
+  getNewData,
+  getEditingId
 } from "./ui.js";
 import { logout } from "./service.js";
 import { auth } from "../auth/firebaseConfig.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { updateAction } from "./controller.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       console.log("User autenticado: ", user.uid);
       const uid = user.uid;
-      await showList(uid);
-      await loadDashboard(uid);
+      await refreshUi(uid)
       showScreen("dashboard");
     } else {
       console.log("Usuário não autenticado, redirecionando...");
@@ -46,8 +46,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = "login.html";
   });
 
-  const btnAtualizar = document.getElementById("btn-atualizar");
-  btnAtualizar.addEventListener("click", () => {
-    dataInput();
+  document.getElementById("btn-atualizar").addEventListener("click", async () => {
+    const objInput = getNewData()
+    const idEmEdicao = getEditingId()
+    await updateAction(idEmEdicao, objInput)
+
   });
 });

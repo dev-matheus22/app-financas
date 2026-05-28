@@ -1,12 +1,13 @@
 import {
-  deleteRegister,
-  createRegister,
   getRegisters,
-  getUid,
-  updateRegister,
   getRegister,
 } from "./service.js";
+import {
+  removeAction
+} from "./controller.js"
+
 let idEmEdicao = null;
+
 
 const dataInput = async () => {
   let valor = Number(document.getElementById("valor").value.trim());
@@ -22,23 +23,10 @@ const dataInput = async () => {
     tipo: tipo,
     data: data,
   };
-  const { success: uidSuccess, uid, error: uidError } = await getUid();
-  if (!uidSuccess) {
-    alert(uidError);
-    return;
-  }
 
-  const result = await createRegister(objInput);
-  if (result.success === false) {
-    return { success: false, error: result.error };
-  } else {
-    cleanForm();
-    idEmEdicao = null;
-    await refreshUI(uid);
-    showScreen("lista");
-  }
-  return result;
-};
+  return objInput;
+
+}
 
 const cleanForm = () => {
   document.getElementById("valor").value = "";
@@ -54,7 +42,7 @@ const fillForm = async (id = null) => {
   const result = await getRegister(id);
   if (result.success) {
     const item = result.data;
-    idEmEdicao = item.id;
+    setEditingId(item.id)
 
     document.getElementById("valor-edit").value = item.valor;
     document.getElementById("descricao-edit").value = item.descricao;
@@ -90,27 +78,13 @@ const refreshUI = async (uid) => {
   await loadDashboard(uid)
 }
 
-document.getElementById("btn-atualizar").addEventListener("click", async () => {
+const setEditingId = (id) => {
+  idEmEdicao = id;
+};
 
-  const { uid, success } = await getUid()
-
-  if (!idEmEdicao) return
-
-  if (!uid) return
-
-  const objInput = getNewData()
-  const result = await updateRegister(idEmEdicao, objInput)
-
-  if (result.success) {
-    idEmEdicao = null
-    await refreshUI(uid)
-  } else {
-    return { success: false, error: "Erro ao atualizar registro" }
-  }
-
-  showScreen("lista")
-
-})
+const getEditingId = () => {
+  return idEmEdicao;
+};
 
 const showList = async (uid) => {
   const { success, data, error } = await getRegisters(uid);
@@ -123,85 +97,94 @@ const showList = async (uid) => {
   lancamentoList.innerHTML = "";
 
   if (data.length === 0) {
-    let card = document.createElement("div");
-    let paragrafo = document.createElement("h4");
-    let addButton = document.createElement("button");
-
-    addButton.innerText = "Registrar";
-    addButton.addEventListener("click", function () {
-      showScreen("adicionar");
-    });
-
-    paragrafo.innerText = "Que tal adicionar uma entrada/despesa?";
-
-    paragrafo.classList.add("paragrafo");
-    card.classList.add("empty-card");
-    addButton.classList.add("btn");
-
-    card.appendChild(paragrafo);
-    card.appendChild(addButton);
-    lancamentoList.appendChild(card);
-
-    return;
+    let emptyState = renderEmptyState()
+    lancamentoList.append(emptyState)
   } else {
     for (const lancamento of data) {
-      let card = document.createElement("div");
-      let spanData = document.createElement("span");
-      let spanCatTip = document.createElement("span");
-      let spanDescricao = document.createElement("span");
-      let spanValor = document.createElement("span");
-      let editButton = document.createElement("button");
-      let removeButton = document.createElement("button");
-
-      let buttonContainer = document.createElement("div");
-      buttonContainer.classList.add("card-buttons");
-
-      editButton.innerText = "Editar";
-      removeButton.innerText = "Remover";
-
-      editButton.addEventListener("click", async () => {
-        await fillForm(lancamento.id);
-      });
-
-      removeButton.addEventListener("click", async () => {
-        const result = await deleteRegister(lancamento.id);
-        if (!result.success) return alert(result.error);
-        await refreshUI(uid);
-      });
-
-      card.classList.add("full-card");
-
-      if (lancamento.tipo === "entrada") {
-        card.classList.add("entrada-card");
-      } else if (lancamento.tipo === "despesa") {
-        card.classList.add("despesa-card");
-      }
-
-      spanData.classList.add("data-format");
-      spanCatTip.classList.add("categoria-tipo-format");
-      spanDescricao.classList.add("descricao-format");
-      spanValor.classList.add("valor-format");
-      editButton.classList.add("small-btn", "edit");
-      removeButton.classList.add("small-btn", "remove");
-
-      spanData.innerText = lancamento.data;
-      spanCatTip.innerText = `${lancamento.categoria} | ${lancamento.tipo} `;
-      spanDescricao.innerText = lancamento.descricao;
-      spanValor.innerText = `R$${lancamento.valor.toFixed(2)}`; //
-
-      card.appendChild(spanData);
-      card.appendChild(spanDescricao);
-      card.appendChild(spanCatTip);
-      card.appendChild(spanValor);
-
-      buttonContainer.appendChild(editButton);
-      buttonContainer.appendChild(removeButton);
-      card.appendChild(buttonContainer);
-
-      lancamentoList.appendChild(card);
+      let fullState = createCard(lancamento)
+      lancamentoList.append(fullState)
     }
   }
-};
+}
+
+
+const renderEmptyState = () => {
+  let card = document.createElement("div");
+  let paragrafo = document.createElement("h4");
+  let addButton = document.createElement("button");
+
+  addButton.innerText = "Registrar";
+  addButton.addEventListener("click", function () {
+    showScreen("adicionar");
+  });
+
+  paragrafo.innerText = "Que tal adicionar uma entrada/despesa?";
+
+  paragrafo.classList.add("paragrafo");
+  card.classList.add("empty-card");
+  addButton.classList.add("btn");
+
+  card.appendChild(paragrafo);
+  card.appendChild(addButton);
+
+  return card;
+}
+
+const createCard = (lancamento) => {
+  let card = document.createElement("div");
+  let spanData = document.createElement("span");
+  let spanCatTip = document.createElement("span");
+  let spanDescricao = document.createElement("span");
+  let spanValor = document.createElement("span");
+  let editButton = document.createElement("button");
+  let removeButton = document.createElement("button");
+
+  let buttonContainer = document.createElement("div");
+  buttonContainer.classList.add("card-buttons");
+
+  editButton.innerText = "Editar";
+  removeButton.innerText = "Remover";
+
+  editButton.addEventListener("click", async () => {
+    await fillForm(lancamento.id);
+  });
+
+  removeButton.addEventListener("click", async () => {
+    await removeAction(lancamento.id)
+  });
+
+  card.classList.add("full-card");
+
+  if (lancamento.tipo === "entrada") {
+    card.classList.add("entrada-card");
+  } else if (lancamento.tipo === "despesa") {
+    card.classList.add("despesa-card");
+  }
+
+  spanData.classList.add("data-format");
+  spanCatTip.classList.add("categoria-tipo-format");
+  spanDescricao.classList.add("descricao-format");
+  spanValor.classList.add("valor-format");
+  editButton.classList.add("small-btn", "edit");
+  removeButton.classList.add("small-btn", "remove");
+
+  spanData.innerText = lancamento.data;
+  spanCatTip.innerText = `${lancamento.categoria} | ${lancamento.tipo} `;
+  spanDescricao.innerText = lancamento.descricao;
+  spanValor.innerText = `R$${lancamento.valor.toFixed(2)}`; //
+
+  card.appendChild(spanData);
+  card.appendChild(spanDescricao);
+  card.appendChild(spanCatTip);
+  card.appendChild(spanValor);
+
+  buttonContainer.appendChild(editButton);
+  buttonContainer.appendChild(removeButton);
+  card.appendChild(buttonContainer);
+
+  return card
+}
+
 
 export const showScreen = async (tela) => {
   let telas = ["dashboard", "adicionar", "editar", "lista"];
@@ -253,4 +236,4 @@ export const menuOn = (btnClicado) => {
   btnClicado.classList.add("active"); // adiciona ao clicado
 };
 
-export { dataInput, fillForm, loadDashboard, showList };
+export { dataInput, fillForm, loadDashboard, showList, getEditingId, getNewData };
